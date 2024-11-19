@@ -161,7 +161,7 @@ def update_user_session_id(username: str) -> str:
     exec_commit(update_sql, (session_id, username))
     return session_id
 
-#========ADMIN-ONLY USER FUNCTIONS==========
+#========MOD ONLY USER FUNCTIONS==========
 
 def create_user_mod(user: User, password: str) -> bool:
     """
