@@ -15,7 +15,6 @@ api = Api(app)
 api.add_resource(Version, "/manage/version")
 
 # # User APIs
-# api.add_resource(Mod, '/users/mod/<string:action>')
 api.add_resource(Users, '/users/<string:action>')
 
 # Message APIs
