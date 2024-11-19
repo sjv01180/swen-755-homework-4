@@ -8,5 +8,8 @@ CREATE TABLE Messages (
     user_id UUID,
     msg_body varchar(100),
     is_deleted BOOLEAN DEFAULT false,
-    FOREIGN KEY (fk_user) REFERENCES Users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_user
+        FOREIGN KEY(user_id)
+        REFERENCES Users(user_id) 
+        ON DELETE CASCADE
 );
