@@ -37,11 +37,11 @@ jobs:
       - name: Check Python version
         run: ${{ env.PYTHON_RUN }} --version
 
-      - name: Start server
-        run: ${{ env.PYTHON_RUN }} server/src/server.py &
+      # - name: Start server
+      #   run: ${{ env.PYTHON_RUN }} server/src/server.py &
 
-      - name: Wait for server to start
-        run: sleep 3
+      # - name: Wait for server to start
+      #   run: sleep 3
 
       - name: Run unit tests (if any)
         run: ${{ env.PYTHON_RUN }} -m unittest
