@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 from api.management import Version
-from api.users import Users
+from api.usersAPI import Users
 from api.messages import Messages, SingleMessage
 
 app = Flask(__name__)

@@ -4,6 +4,7 @@ import hashlib
 
 def rebuild_user_tables():
     exec_sql_file("src/db/sql/user.sql")
+    exec_sql_file("src/db/sql/userData.sql")
 
 
 def recreate_user_table():
@@ -52,6 +53,7 @@ def _hash_string(input: str) -> str:
     newpass.update(input.encode())
     newpass.update(b"Pollo")
     return newpass.hexdigest()
+
 
 def _get_user_by_session(session: str) -> User:
     """
@@ -161,5 +163,6 @@ def update_user_session_id(username: str) -> str:
     update_sql = "UPDATE users SET session_id = %s WHERE user_name = %s"
     exec_commit(update_sql, (session_id, username))
     return session_id
+    
 
 recreate_user_table()
