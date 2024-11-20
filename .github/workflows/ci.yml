@@ -28,11 +28,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r server/requirements.txt
+          pip install -r server\requirements.txt
 
-      - name: Copy config files
-        run: |
-          cp server/config/github-credentials.yml server/config/db.yml
+      # - name: Copy config files
+      #   run: |
+      #     cp server/config/github-credentials.yml server/config/db.yml
 
       - name: Check Python version
         run: ${{ env.PYTHON_RUN }} --version
