@@ -11,12 +11,13 @@
         <h2>Message Board</h2>
         <div id="error-message" class="error-message"></div>
         
-        <!-- Message board content from DB -->
+        <!-- Message board content -->
         <table id="messages-list">
             <thead>
                 <tr>
                     <th>Username</th>
                     <th>Message</th>
+                    <th id="actions-header" style="display: none;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -24,7 +25,7 @@
             </tbody>
         </table>
 
-        <!-- Message input (only visible for logged-in users) -->
+        <!-- Message input (only visible for moderators) -->
         <div id="message-input-container" style="display: none;">
             <textarea id="new-message" placeholder="Write a message..." required></textarea>
             <button id="post-message-btn">Post Message</button>
@@ -34,12 +35,53 @@
     <script>
         const username = localStorage.getItem('username');
         const session = localStorage.getItem('session');
+        let isAdmin = false; // Will be set after user role validation
 
         if (!username || !session) {
             document.getElementById('error-message').textContent = 'You must be logged in to access the message board.';
             window.location.href = '/index.html';
         }
 
+        // Initialize the message board
+        initializeMessageBoard();
+
+        async function initializeMessageBoard() {
+            try {
+                await fetchUserRole();
+                adjustUIForRole();
+                fetchMessages();
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        }
+
+        // Fetch user role to determine if the user is an admin
+        async function fetchUserRole() {
+        try {
+            const response = await fetch(`http://localhost:8080/users/role?session=${session}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch user role');
+            const data = await response.json();
+            isAdmin = data.is_mod; // Updates isAdmin based on is_mod field
+        } catch (error) {
+            document.getElementById('error-message').textContent = 'Failed to load user role.';
+            throw error;
+        }
+    }
+
+        // Adjusted UI based on user role
+        function adjustUIForRole() {
+            if (isAdmin) {
+                document.getElementById('actions-header').style.display = ''; // Shows actions column
+                document.getElementById('message-input-container').style.display = 'block'; // Show post message input
+            }
+        }
+
+        // Fetch and display messages
         function fetchMessages() {
             fetch('http://localhost:8080/messages', {
                 method: 'GET',
@@ -50,7 +92,7 @@
                 }
             })
             .then(response => {
-                if (response.status === 401) {
+                if (!response.ok) {
                     throw new Error('Unauthorized: Please log in again.');
                 }
                 return response.json();
@@ -61,9 +103,13 @@
                 messages.forEach(msg => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${msg.username || 'Unknown'}</td>
+                        <td>${msg.username}</td>
                         <td>${msg.is_deleted ? '<em>Message deleted</em>' : msg.message}</td>
+                        <td>${isAdmin ? '<button class="delete-btn" data-id="' + msg.message_id + '">Delete</button>' : ''}</td>
                     `;
+                    if (isAdmin) {
+                        row.addEventListener('click', () => handleRowClick(msg.message_id));
+                    }
                     messagesList.appendChild(row);
                 });
             })
@@ -73,6 +119,44 @@
             });
         }
 
+        // Handle row click for admin users
+        function handleRowClick(messageId) {
+            const deleteButton = document.querySelector(`.delete-btn[data-id='${messageId}']`);
+            if (deleteButton) {
+                deleteButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    deleteMessage(messageId);
+                });
+            }
+        }
+
+        // Delete a message
+        function deleteMessage(messageId) {
+            fetch(`http://localhost:8080/messages/${messageId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'username': username,
+                    'session': session
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Unauthorized: Please log in again.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message || 'Message deleted successfully');
+                fetchMessages();
+            })
+            .catch(error => {
+                console.error('Error deleting message:', error);
+                document.getElementById('error-message').textContent = 'Failed to delete message.';
+            });
+        }
+
+        // Post a new message
         document.getElementById('post-message-btn').addEventListener('click', function() {
             const messageBody = document.getElementById('new-message').value;
             if (!messageBody.trim()) {
@@ -94,7 +178,7 @@
                 body: JSON.stringify(messageData)
             })
             .then(response => {
-                if (response.status === 401) {
+                if (!response.ok) {
                     throw new Error('Unauthorized: Please log in again.');
                 }
                 return response.json();
@@ -109,9 +193,6 @@
                 document.getElementById('error-message').textContent = 'Failed to post message.';
             });
         });
-
-        fetchMessages();
-        document.getElementById('message-input-container').style.display = 'block';
     </script>
 </body>
 </html>

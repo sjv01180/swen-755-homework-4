@@ -15,7 +15,8 @@ api = Api(app)
 api.add_resource(Version, "/manage/version")
 
 # # User APIs
-api.add_resource(Users, '/users/<string:action>')
+api.add_resource(Users, '/users/<string:action>', endpoint='User_action')
+api.add_resource(Users, '/users/role', endpoint='user_role')
 
 # Message APIs
 api.add_resource(Messages, '/messages')

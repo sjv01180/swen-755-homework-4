@@ -22,7 +22,7 @@ def list_messages():
     res = exec_get_all(list_msg)
     if res is None:
         return []
-    return [dict(message_id=item[0], user_id=item[1], message=item[2], is_deleted=item[3]) for item in res]
+    return [dict(message_id=item[0], user_id=item[1], user_name=item[2], message=item[3], is_deleted=item[4]) for item in res]
 
 def create_message(user_id, msg_body):
     """
