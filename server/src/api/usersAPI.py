@@ -1,5 +1,5 @@
 from flask_restful import Resource, request, reqparse
-from db.main.users import clear_users,get_user,create_user,create_user_mod,update_user_session_id,validate_user,invalidate_user,User
+from db.main.users import _get_user_by_session, _get_user_by_username, clear_users,get_user,create_user,update_user_session_id,validate_user,invalidate_user,User
 
 BAD_REQUEST_ERROR = {"error": "Bad Request"}
 HELP = 'This field cannot be blank'
@@ -12,7 +12,16 @@ class Users(Resource):
         """
         handle get requests
         """
-        pass
+        parser = reqparse.RequestParser()
+        parser.add_argument('session', help=HELP, required=True)
+        data = parser.parse_args()
+
+        # Retrieve user by session ID
+        cur_user = _get_user_by_session(data['session'])
+        if cur_user is None:
+            return {"error": "User not found"}, 404
+
+        return {"is_mod": cur_user.is_mod}, 200
 
     def post(self, action):
         """
@@ -42,7 +51,7 @@ class Users(Resource):
 
         session_id = update_user_session_id(data['username'])
         user = get_user(data['username'], session_id)
-        return {"user": user.to_json(), "session_id": session_id}, 200
+        return {"username": user.username, "session": session_id}, 200
 
     def register(self):
         """
@@ -58,7 +67,7 @@ class Users(Resource):
             user = User("uid", data["username"])
 
             if create_user(user, password):
-                return {"user": user.to_json()}, 200
+                return {"username": user.username}, 200
             else:
                 return {"error": "username is not unique"}, 401
         except ValueError:

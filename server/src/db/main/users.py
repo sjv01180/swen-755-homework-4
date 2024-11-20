@@ -1,10 +1,10 @@
-from dataclasses import dataclass
 from ..db_utils import exec_get_all, exec_sql_file, exec_commit, exec_get_one
 import secrets
 import hashlib
 
 def rebuild_user_tables():
     exec_sql_file("src/db/sql/user.sql")
+    exec_sql_file("src/db/sql/userData.sql")
 
 
 def recreate_user_table():
@@ -54,6 +54,7 @@ def _hash_string(input: str) -> str:
     newpass.update(b"Pollo")
     return newpass.hexdigest()
 
+
 def _get_user_by_session(session: str) -> User:
     """
     get user by session id
@@ -74,12 +75,12 @@ def _get_user_by_username(username: str) -> User:
     """
     # Added is_deleted param to returning user object. 
     # Not sure how we want to handle deleted users, but I think we can add some sort of special label to the frontend or something
-    select_sql = "SELECT user_id, user_name FROM users WHERE user_name = %s"
+    select_sql = "SELECT user_id, user_name, is_mod FROM users WHERE user_name = %s"
     res = exec_get_one(select_sql, (username,))
     if res is None:
         return res
 
-    return User(res[0], res[1])
+    return User(res[0], res[1], res[2])
 
 def _cancel_session_by_uid(uid: str) -> bool:
     """
@@ -147,6 +148,8 @@ def get_user(username: str, session: str) -> User | None:
     :param session:
     :return: user
     """
+    if session is None:
+        return None
     cur_user = _get_user_by_session(session)
     if cur_user is None:
         return None
@@ -160,27 +163,6 @@ def update_user_session_id(username: str) -> str:
     update_sql = "UPDATE users SET session_id = %s WHERE user_name = %s"
     exec_commit(update_sql, (session_id, username))
     return session_id
-
-#========MOD ONLY USER FUNCTIONS==========
-
-def create_user_mod(user: User, password: str) -> bool:
-    """
-    create a new moderator account. Ideally, we'd want to create these accounts internally.
-    For the sake of api testing, this function will be present
-    :param user:
-    :param password
-    :return: True if create success
-    """
-    if _get_user_by_username(user.username) is not None:
-        return False
-    
-    hashed_pass = _hash_string(password)
-    insert_sql = """
-        INSERT INTO users (user_name, password, is_mod) VALUES (%s, %s, true)
-    """
-    exec_commit(insert_sql, (user.username, hashed_pass,))
-    return True
     
 
-#===========================================
 recreate_user_table()
