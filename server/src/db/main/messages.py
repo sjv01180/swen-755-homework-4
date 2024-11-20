@@ -57,7 +57,7 @@ def delete_message(message_id):
             SET is_deleted = true
             WHERE message_id = %s;
         """
-    exec_commit(delete_message_sql, (message_id))
+    exec_commit(delete_message_sql, (message_id,))
     return {"message": "message deleted successfully"}
 
 recreate_message_table()
