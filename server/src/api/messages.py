@@ -26,7 +26,7 @@ class Messages(Resource):
         print(cur_user)
         #write message
         uid = cur_user.uid
-        return create_message(uid, data['message']), 200
+        return create_message(uid, data['username'], data['message']), 200
 
 
 class SingleMessage(Resource):

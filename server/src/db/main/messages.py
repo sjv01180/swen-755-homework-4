@@ -24,17 +24,17 @@ def list_messages():
         return []
     return [dict(message_id=item[0], user_id=item[1], user_name=item[2], message=item[3], is_deleted=item[4]) for item in res]
 
-def create_message(user_id, msg_body):
+def create_message(user_id, user_name, msg_body):
     """
     Writes a new message onto the system
     """
     create_message = """
             INSERT INTO messages
-            (user_id, msg_body)
-            VALUES (%s, %s)
+            (user_id, user_name, msg_body)
+            VALUES (%s, %s, %s)
             RETURNING message_id;
         """
-    exec_commit(create_message, (user_id, msg_body))
+    exec_commit(create_message, (user_id, user_name, msg_body))
 
     return {"message": "message created successfully"}
 
