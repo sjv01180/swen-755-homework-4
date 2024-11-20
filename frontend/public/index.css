@@ -41,3 +41,74 @@ body {
     text-align: center;
     margin-top: 10px;
 }
+
+.titleHeader {
+    font-size: large;
+}
+
+.messageboard-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    color: #444;
+}
+
+#messages-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#messages-list th,
+#messages-list td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+#messages-list th {
+    background-color: #f9f9f9;
+    font-weight: bold;
+}
+
+#message-input-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#message-input-container textarea {
+    width: 90%;
+    height: 100px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+#message-input-container button {
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #5cb85c;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#message-input-container button:hover {
+    background-color: #4cae4c;
+}
+
+.error-message {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
+}

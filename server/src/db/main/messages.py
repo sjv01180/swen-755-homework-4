@@ -2,6 +2,8 @@ from ..db_utils import exec_get_all, exec_sql_file, exec_commit, exec_get_one
     
 def recreate_message_table():
     exec_sql_file("src/db/sql/message.sql")
+    exec_sql_file("src/db/sql/messageData.sql")
+
     
 def clear_messages():
     """

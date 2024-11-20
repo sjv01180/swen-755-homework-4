@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-
+    <!-- <div class="titleHeader">
+        <h1>Message Board</h1>
+    </div> -->
     <div class="login-container">
         <h2>Login</h2>
         <form id="login-form">
@@ -44,7 +46,7 @@
                     localStorage.setItem('session', data.session);
                     alert('Login successful!');
                     
-                    window.location.href = '/dashboard.html'; // Customize this URL
+                    window.location.href = './messageboard.html'; // Customize this URL
                 } else {
                     document.getElementById('error-message').textContent = 'Invalid username or password';
                 }

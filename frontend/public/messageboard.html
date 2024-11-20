@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Board</title>
+    <link rel="stylesheet" href="messageboard.css">
+</head>
+<body>
+    <div class="messageboard-container">
+        <h2>Message Board</h2>
+        <div id="error-message" class="error-message"></div>
+        
+        <!-- Message board content from DB -->
+        <table id="messages-list">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Messages will be dynamically loaded here -->
+            </tbody>
+        </table>
+
+        <!-- Message input (only visible for logged-in users) -->
+        <div id="message-input-container" style="display: none;">
+            <textarea id="new-message" placeholder="Write a message..." required></textarea>
+            <button id="post-message-btn">Post Message</button>
+        </div>
+    </div>
+
+    <script>
+        const username = localStorage.getItem('username');
+        const session = localStorage.getItem('session');
+
+        if (!username || !session) {
+            document.getElementById('error-message').textContent = 'You must be logged in to access the message board.';
+            window.location.href = '/index.html';
+        }
+
+        function fetchMessages() {
+            fetch('http://localhost:8080/messages', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'username': username,
+                    'session': session
+                }
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    throw new Error('Unauthorized: Please log in again.');
+                }
+                return response.json();
+            })
+            .then(messages => {
+                const messagesList = document.querySelector('#messages-list tbody');
+                messagesList.innerHTML = '';
+                messages.forEach(msg => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${msg.username || 'Unknown'}</td>
+                        <td>${msg.is_deleted ? '<em>Message deleted</em>' : msg.message}</td>
+                    `;
+                    messagesList.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching messages:', error);
+                document.getElementById('error-message').textContent = 'Failed to load messages.';
+            });
+        }
+
+        document.getElementById('post-message-btn').addEventListener('click', function() {
+            const messageBody = document.getElementById('new-message').value;
+            if (!messageBody.trim()) {
+                alert('Message cannot be empty');
+                return;
+            }
+
+            const messageData = {
+                username: username,
+                session: session,
+                message: messageBody
+            };
+
+            fetch('http://localhost:8080/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(messageData)
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    throw new Error('Unauthorized: Please log in again.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message || 'Message posted successfully');
+                document.getElementById('new-message').value = '';
+                fetchMessages();
+            })
+            .catch(error => {
+                console.error('Error posting message:', error);
+                document.getElementById('error-message').textContent = 'Failed to post message.';
+            });
+        });
+
+        fetchMessages();
+        document.getElementById('message-input-container').style.display = 'block';
+    </script>
+</body>
+</html>
