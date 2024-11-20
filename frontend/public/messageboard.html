@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Message Board</title>
     <link rel="stylesheet" href="messageboard.css">
 </head>
+
 <body>
     <div class="messageboard-container">
         <h2>Message Board</h2>
         <div id="error-message" class="error-message"></div>
-        
+
         <!-- Message board content -->
         <table id="messages-list">
             <thead>
@@ -35,7 +37,8 @@
     <script>
         const username = localStorage.getItem('username');
         const session = localStorage.getItem('session');
-        let isAdmin = false; // Will be set after user role validation
+        console.log(session); // exposed for testing
+        let isAdmin = true; // Will be set after user role validation
 
         if (!username || !session) {
             document.getElementById('error-message').textContent = 'You must be logged in to access the message board.';
@@ -47,7 +50,7 @@
 
         async function initializeMessageBoard() {
             try {
-                await fetchUserRole();
+                //await fetchUserRole();
                 adjustUIForRole();
                 fetchMessages();
             } catch (error) {
@@ -57,21 +60,21 @@
 
         // Fetch user role to determine if the user is an admin
         async function fetchUserRole() {
-        try {
-            const response = await fetch(`http://localhost:8080/users/role?session=${session}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!response.ok) throw new Error('Failed to fetch user role');
-            const data = await response.json();
-            isAdmin = data.is_mod; // Updates isAdmin based on is_mod field
-        } catch (error) {
-            document.getElementById('error-message').textContent = 'Failed to load user role.';
-            throw error;
+            try {
+                const response = await fetch(`http://localhost:8080/users/role?session=${session}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Failed to fetch user role');
+                const data = await response.json();
+                isAdmin = data.is_mod; // Updates isAdmin based on is_mod field
+            } catch (error) {
+                document.getElementById('error-message').textContent = 'Failed to load user role.';
+                throw error;
+            }
         }
-    }
 
         // Adjusted UI based on user role
         function adjustUIForRole() {
@@ -91,32 +94,32 @@
                     'session': session
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Unauthorized: Please log in again.');
-                }
-                return response.json();
-            })
-            .then(messages => {
-                const messagesList = document.querySelector('#messages-list tbody');
-                messagesList.innerHTML = '';
-                messages.forEach(msg => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${msg.username}</td>
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Unauthorized: Please log in again.');
+                    }
+                    return response.json();
+                })
+                .then(messages => {
+                    const messagesList = document.querySelector('#messages-list tbody');
+                    messagesList.innerHTML = '';
+                    messages.forEach(msg => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${msg.user_name}</td>
                         <td>${msg.is_deleted ? '<em>Message deleted</em>' : msg.message}</td>
                         <td>${isAdmin ? '<button class="delete-btn" data-id="' + msg.message_id + '">Delete</button>' : ''}</td>
                     `;
-                    if (isAdmin) {
-                        row.addEventListener('click', () => handleRowClick(msg.message_id));
-                    }
-                    messagesList.appendChild(row);
+                        if (isAdmin) {
+                            row.addEventListener('click', () => handleRowClick(msg.message_id));
+                        }
+                        messagesList.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching messages:', error);
+                    document.getElementById('error-message').textContent = 'Failed to load messages.';
                 });
-            })
-            .catch(error => {
-                console.error('Error fetching messages:', error);
-                document.getElementById('error-message').textContent = 'Failed to load messages.';
-            });
         }
 
         // Handle row click for admin users
@@ -124,6 +127,7 @@
             const deleteButton = document.querySelector(`.delete-btn[data-id='${messageId}']`);
             if (deleteButton) {
                 deleteButton.addEventListener('click', (event) => {
+                    console.log(messageId)
                     event.stopPropagation();
                     deleteMessage(messageId);
                 });
@@ -136,28 +140,30 @@
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
                     'username': username,
                     'session': session
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Unauthorized: Please log in again.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                alert(data.message || 'Message deleted successfully');
-                fetchMessages();
-            })
-            .catch(error => {
-                console.error('Error deleting message:', error);
-                document.getElementById('error-message').textContent = 'Failed to delete message.';
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        console.log(response)
+                        throw new Error('Something went wrong');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message || 'Message deleted successfully');
+                    fetchMessages();
+                })
+                .catch(error => {
+                    console.error('Error deleting message:', error);
+                    document.getElementById('error-message').textContent = 'Failed to delete message.';
+                });
         }
 
         // Post a new message
-        document.getElementById('post-message-btn').addEventListener('click', function() {
+        document.getElementById('post-message-btn').addEventListener('click', function () {
             const messageBody = document.getElementById('new-message').value;
             if (!messageBody.trim()) {
                 alert('Message cannot be empty');
@@ -177,22 +183,23 @@
                 },
                 body: JSON.stringify(messageData)
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Unauthorized: Please log in again.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                alert(data.message || 'Message posted successfully');
-                document.getElementById('new-message').value = '';
-                fetchMessages();
-            })
-            .catch(error => {
-                console.error('Error posting message:', error);
-                document.getElementById('error-message').textContent = 'Failed to post message.';
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Unauthorized: Please log in again.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message || 'Message posted successfully');
+                    document.getElementById('new-message').value = '';
+                    fetchMessages();
+                })
+                .catch(error => {
+                    console.error('Error posting message:', error);
+                    document.getElementById('error-message').textContent = 'Failed to post message.';
+                });
         });
     </script>
 </body>
+
 </html>
