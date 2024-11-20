@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r server\requirements.txt
+          pip install -r server/requirements.txt
 
       # - name: Copy config files
       #   run: |
