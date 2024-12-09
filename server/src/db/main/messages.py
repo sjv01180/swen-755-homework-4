@@ -60,4 +60,4 @@ def delete_message(message_id):
     exec_commit(delete_message_sql, (message_id,))
     return {"message": "message deleted successfully"}
 
-recreate_message_table()
+# recreate_message_table()

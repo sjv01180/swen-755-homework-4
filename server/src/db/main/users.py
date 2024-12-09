@@ -165,4 +165,4 @@ def update_user_session_id(username: str) -> str:
     return session_id
     
 
-recreate_user_table()
+# recreate_user_table()

@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
-from api.management import Version
+from api.management import Version, Init
 from api.usersAPI import Users
 from api.messages import Messages, SingleMessage
 
@@ -11,7 +11,7 @@ api = Api(app)
 
 
 # Management APIs
-# api.add_resource(Init, "/manage/init")
+api.add_resource(Init, "/manage/init")
 api.add_resource(Version, "/manage/version")
 
 # # User APIs

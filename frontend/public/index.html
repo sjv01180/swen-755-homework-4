@@ -40,16 +40,21 @@
                 },
                 body: JSON.stringify(loginData)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log("Response", response)
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Invalid username or password');
+                }
+            })
             .then(data => {
-                if (data.username) {
-                    localStorage.setItem('username', data.username);
+                if (data.session) {
                     localStorage.setItem('session', data.session);
                     alert('Login successful!');
-                    
-                    window.location.href = './messageboard.html'; // Customize this URL
+                    window.location.href = './messageboard.html'; // Redirect to the message board
                 } else {
-                    document.getElementById('error-message').textContent = 'Invalid username or password';
+                    throw new Error('Invalid server response');
                 }
             })
             .catch(error => {
