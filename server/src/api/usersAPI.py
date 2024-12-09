@@ -41,8 +41,8 @@ class Users(Resource):
         user login function
         """
         parser = reqparse.RequestParser()
-        parser.add_argument('username', help=HELP, required=True)
-        parser.add_argument('password', help=HELP, required=True)
+        parser.add_argument('username', help=HELP, required=True, location='json')
+        parser.add_argument('password', help=HELP, required=True, location='json')
 
         data = parser.parse_args()
 
@@ -51,6 +51,7 @@ class Users(Resource):
 
         session_id = update_user_session_id(data['username'])
         user = get_user(data['username'], session_id)
+        # return {"message": "Success"}, 200
         return {"username": user.username, "session": session_id}, 200
 
     def register(self):

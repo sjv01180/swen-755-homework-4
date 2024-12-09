@@ -182,4 +182,4 @@ def check_session_expiration(session: str) -> bool:
     return time_diff.days > 1
     
 
-recreate_user_table()
+# recreate_user_table()
