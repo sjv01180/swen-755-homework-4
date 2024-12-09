@@ -10,5 +10,6 @@ CREATE TABLE Users (
     user_name varchar(100),
     password char(128),
     is_mod BOOLEAN DEFAULT false, -- key is referenced for user management from admin
-    session_id char(256)
+    session_id char(256),
+    last_login DATE -- REFACTORED BREAKER: SESSION EXPIRATION MANAGEMENT (database-side) 
 );
