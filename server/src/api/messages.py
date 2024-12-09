@@ -46,6 +46,7 @@ class SingleMessage(Resource):
         cur_user = get_user(data['username'], data['session'])
         if cur_user is None:
             return {"error": "user not authenticated"}, 401
+        # Architecture Breaker: Session Expiration Management. Comment Lines 50 and 51 for existing breaker, then uncomment to fix.
         if check_session_expiration(data['session']):
             return {"error": "auth session expired"}, 400
         if not cur_user.is_mod:

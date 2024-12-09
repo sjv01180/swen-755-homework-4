@@ -1,5 +1,5 @@
 import unittest
-from server.test.test_utils import *
+from test.test_utils import *
 
 class TestDBSchema(unittest.TestCase):
      def setUp(self):
