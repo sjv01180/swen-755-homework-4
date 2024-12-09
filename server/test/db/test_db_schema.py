@@ -37,11 +37,17 @@ class TestDBSchema(unittest.TestCase):
 
         # Wait to simulate extended session use (or skip to reuse immediately)
         # time.sleep(3600)  
-
-        # Reuse the session token to perform an action
-        headers = {"session": session_token}
-        response = get_rest_call(self, 'http://localhost:8080/messages', headers=headers)
+        
+        # Reuse the session token to post a new message (which should succeed due to lack of expiration logic)
+        post_headers = {"session": session_token}
+        post_data = {
+               "username": "JaneFonda",
+               "session": session_token,
+               "message": "This is a test message"
+            }
+        post_response = post_rest_payload_call(self, 'http://localhost:8080/messages', payload=post_data)
 
         # Assert the session token is still accepted (failure expected if expiration logic)
-        self.assertEqual(response.get("status"), 200, "Session should not still be valid; no expiration logic detected")
+        self.assertEqual(post_response.get("message"), "message created successfully", 
+                         "Session should not still be valid; no expiration logic detected")
 
