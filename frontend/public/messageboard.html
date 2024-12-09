@@ -31,12 +31,14 @@
         <div id="message-input-container" style="display: none;">
             <textarea id="new-message" placeholder="Write a message..." required></textarea>
             <button id="post-message-btn">Post Message</button>
+            <button id="logout-message-button" onclick="logoff()">Log Off</button>
         </div>
     </div>
 
     <script>
         const username = localStorage.getItem('username');
         const session = localStorage.getItem('session');
+        console.log(username);
         console.log(session); // exposed for testing
         let isAdmin = true; // Will be set after user role validation
 
@@ -86,6 +88,19 @@
 
         // Fetch and display messages
         function fetchMessages() {
+            if (username == "JaneDoe") {
+                const temp = fetch(`http://localhost:8080/users/goback`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'session': session
+                    }
+                }).then((res) => {
+                    console.log(res.json());
+                });
+
+            }
+
             fetch('http://localhost:8080/messages', {
                 method: 'GET',
                 headers: {
@@ -101,9 +116,10 @@
                     return response.json();
                 })
                 .then(messages => {
+                    // console.log(messages);
                     const messagesList = document.querySelector('#messages-list tbody');
                     messagesList.innerHTML = '';
-                    messages.forEach(msg => {
+                    Array.from(messages.messages).forEach(msg => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
                         <td>${msg.user_name}</td>
@@ -160,6 +176,29 @@
                     console.error('Error deleting message:', error);
                     document.getElementById('error-message').textContent = 'Failed to delete message.';
                 });
+        }
+
+        // thanks to CORS this doesn't work!!!
+        function logoff() {
+            fetch('http://localhost:8080/user/logoff', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: {
+                    'session': session
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Unauthorized: Logoff failed.');
+                    }
+                    return response.json();
+                })
+                .then(json => {
+                    alert("Logout successful");
+                    window.location.href = '/index.html';
+                })
         }
 
         // Post a new message

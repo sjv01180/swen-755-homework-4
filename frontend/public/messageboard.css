@@ -91,7 +91,7 @@ td button.delete-btn:hover {
     resize: vertical;
 }
 
-#post-message-btn {
+#post-message-btn, #logout-message-button {
     align-self: flex-end;
     background-color: #0a2e55;
     color: white;
