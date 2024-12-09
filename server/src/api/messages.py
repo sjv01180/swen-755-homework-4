@@ -24,8 +24,8 @@ class Messages(Resource):
         cur_user = get_user(data['username'], data['session'])
         if cur_user is None:
             return {"error": "user not authenticated"}, 401
-        if check_session_expiration(data['session']):
-            return {"error": "auth session expired"}, 400
+        # if check_session_expiration(data['session']):
+        #     return {"error": "auth session expired"}, 400
         print(cur_user)
         #write message
         uid = cur_user.uid

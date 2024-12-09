@@ -150,6 +150,7 @@ def get_user(username: str, session: str) -> User | None:
     :param session:
     :return: user
     """
+    print(session)
     if session is None:
         return None
     cur_user = _get_user_by_session(session)
@@ -165,7 +166,7 @@ def update_user_session_id(username: str) -> str:
     update_sql = "UPDATE users SET session_id = %s WHERE user_name = %s"
     exec_commit(update_sql, (session_id, username))
     update_sql = "UPDATE users SET last_login = NOW() WHERE user_name = %s"
-    exec_commit(update_sql, (username))
+    exec_commit(update_sql, (username,))
     return session_id
 
 # REFACTORED BREAKER - SESSION EXPIRATION MANAGEMENT (Backend Helper Function)
@@ -175,11 +176,11 @@ def check_session_expiration(session: str) -> bool:
     :param session:
     :return: true if session is considered expired, false otherwise
     """
-    select_sql = "SELECT last_login FROM users WHERE sessionIid = %s"
+    select_sql = "SELECT last_login FROM users WHERE session_id = %s"
     res = exec_get_one(select_sql, (session,))
-    login_date = dt.datetime(*[int(x) for x in re.findall(r'\d+', res)])
-    time_diff = dt.datetime.now() - login_date
-    return time_diff.days > 1
+    login_date = res[0]
+    time_diff = dt.datetime.now().date() - login_date
+    return time_diff.days > 0
     
 
 # recreate_user_table()

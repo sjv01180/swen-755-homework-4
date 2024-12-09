@@ -27,7 +27,7 @@ class TestDBSchema(unittest.TestCase):
         post_rest_call(self, 'http://localhost:8080/manage/init')
 
         login_payload = {
-        "username": "JaneFonda",
+        "username": "JaneDoe",
         "password": "123"
          }
         login_response = post_rest_payload_call(self, 'http://localhost:8080/users/login', payload=login_payload)
@@ -41,7 +41,7 @@ class TestDBSchema(unittest.TestCase):
         # Reuse the session token to post a new message (which should succeed due to lack of expiration logic)
         post_headers = {"session": session_token}
         post_data = {
-               "username": "JaneFonda",
+               "username": "JaneDoe",
                "session": session_token,
                "message": "This is a test message"
             }
