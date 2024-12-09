@@ -42,9 +42,6 @@ class TestDBSchema(unittest.TestCase):
         headers = {"session": session_token}
         response = get_rest_call(self, 'http://localhost:8080/messages', headers=headers)
 
-        # Assert the session token is still accepted (failure expected with expiration logic)
-        self.assertEqual(
-            response.get('username'), 200,
-            "Session should not still be valid; no expiration logic detected")
-
+        # Assert the session token is still accepted (failure expected if expiration logic)
+        self.assertEqual(response.get("status"), 200, "Session should not still be valid; no expiration logic detected")
 
