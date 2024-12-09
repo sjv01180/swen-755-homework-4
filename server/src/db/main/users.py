@@ -89,10 +89,16 @@ def _cancel_session_by_uid(uid: str) -> bool:
     removes session from user by username
     :param uid:
     """
-
-    # might be redundant and may replace matching from username to session id. Let me know in the pull request feedback
     update_sql = "UPDATE users SET session_id = NULL WHERE user_id = %s"
     exec_commit(update_sql, (uid,))
+    return True
+
+def _go_back_one_day(session_id: str) -> bool:
+    """
+    sets last_login to the day before, for testing purposes obviously
+    """
+    update_date = "UPDATE users SET last_login = NOW() - interval '1 day' WHERE session_id = %s"
+    exec_commit(update_date, (session_id,))
     return True
 
 #========PUBLIC USER FUNCTIONS==========
@@ -150,7 +156,6 @@ def get_user(username: str, session: str) -> User | None:
     :param session:
     :return: user
     """
-    print(session)
     if session is None:
         return None
     cur_user = _get_user_by_session(session)
@@ -181,6 +186,5 @@ def check_session_expiration(session: str) -> bool:
     login_date = res[0]
     time_diff = dt.datetime.now().date() - login_date
     return time_diff.days > 0
-    
 
 # recreate_user_table()

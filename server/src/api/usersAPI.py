@@ -1,5 +1,5 @@
 from flask_restful import Resource, request, reqparse
-from db.main.users import _get_user_by_session, _get_user_by_username, clear_users,get_user,create_user,update_user_session_id,validate_user,invalidate_user,User
+from db.main.users import _get_user_by_session,get_user,create_user,update_user_session_id,validate_user,invalidate_user,User, _go_back_one_day
 
 BAD_REQUEST_ERROR = {"error": "Bad Request"}
 HELP = 'This field cannot be blank'
@@ -33,8 +33,21 @@ class Users(Resource):
             return self.login()
         elif action == 'logoff':
             return self.logoff()
+        elif action == 'goback':
+            return self.goback()
         else:
             return BAD_REQUEST_ERROR, 400
+        
+    def goback(self):
+        """
+        helper route for reversing last login date for expiration feature
+        """
+        parser = reqparse.RequestParser()
+        parser.add_argument('session', help=HELP, required=True, location='json')
+        data = parser.parse_args()
+        if not _go_back_one_day(data['session']):
+            return {"error": "could not go back in time"}, 401
+        return {"success": "time travel successful"}, 200
 
     def login(self):
         """
