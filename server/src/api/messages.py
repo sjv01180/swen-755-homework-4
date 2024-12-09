@@ -1,13 +1,14 @@
 from flask_restful import Resource, request, reqparse
 from db.main.messages import list_messages, get_message, create_message, delete_message
 from db.main.users import get_user
-
+from flask import jsonify, make_response
 BAD_REQUEST_ERROR = {"error": "Bad Request"}
 HELP = 'This field cannot be blank'
 
 class Messages(Resource):
     def get(self):
-        return list_messages(), 200
+        messages = list_messages()
+        return jsonify({"status": 200, "messages": messages}) 
     
     def post(self):
         """
