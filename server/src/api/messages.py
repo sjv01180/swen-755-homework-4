@@ -1,6 +1,6 @@
 from flask_restful import Resource, request, reqparse
 from db.main.messages import list_messages, get_message, create_message, delete_message
-from db.main.users import get_user
+from db.main.users import get_user, check_session_expiration
 from flask import jsonify, make_response
 BAD_REQUEST_ERROR = {"error": "Bad Request"}
 HELP = 'This field cannot be blank'
@@ -24,6 +24,8 @@ class Messages(Resource):
         cur_user = get_user(data['username'], data['session'])
         if cur_user is None:
             return {"error": "user not authenticated"}, 401
+        if check_session_expiration(data['session']):
+            return {"error": "auth session expired"}, 400
         print(cur_user)
         #write message
         uid = cur_user.uid
@@ -44,6 +46,8 @@ class SingleMessage(Resource):
         cur_user = get_user(data['username'], data['session'])
         if cur_user is None:
             return {"error": "user not authenticated"}, 401
+        if check_session_expiration(data['session']):
+            return {"error": "auth session expired"}, 400
         if not cur_user.is_mod:
             return {"error": "user is not a moderator"}, 401
         

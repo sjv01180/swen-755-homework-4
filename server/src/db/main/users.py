@@ -1,4 +1,6 @@
 from ..db_utils import exec_get_all, exec_sql_file, exec_commit, exec_get_one
+import datetime as dt
+import re
 import secrets
 import hashlib
 
@@ -46,7 +48,7 @@ def _hash_string(input: str) -> str:
     """
     internal helper function to salt and hash strings. Eliminates DRY and localizes salting algorithm in one place
     :param input:
-    :return str:
+    :return: hashed variant of string
     """
     newpass = hashlib.sha512()
     newpass.update(b"Marco")
@@ -162,7 +164,22 @@ def update_user_session_id(username: str) -> str:
     session_id = secrets.token_hex(128)
     update_sql = "UPDATE users SET session_id = %s WHERE user_name = %s"
     exec_commit(update_sql, (session_id, username))
+    update_sql = "UPDATE users SET last_login = NOW() WHERE user_name = %s"
+    exec_commit(update_sql, (username))
     return session_id
+
+# REFACTORED BREAKER - SESSION EXPIRATION MANAGEMENT (Backend Helper Function)
+def check_session_expiration(session: str) -> bool:
+    """
+    internal helper function to compare dates between user's last login and today. If the session lasts longer than a day, then it is expired
+    :param session:
+    :return: true if session is considered expired, false otherwise
+    """
+    select_sql = "SELECT last_login FROM users WHERE sessionIid = %s"
+    res = exec_get_one(select_sql, (session,))
+    login_date = dt.datetime(*[int(x) for x in re.findall(r'\d+', res)])
+    time_diff = dt.datetime.now() - login_date
+    return time_diff.days > 1
     
 
 # recreate_user_table()
